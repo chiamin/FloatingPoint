@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>小數點計算練習</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#ff6b9d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="小數練習">
+<link rel="apple-touch-icon" href="icon-180.png">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+    background: #ffe9a8;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .card {
+    background: #fff;
+    border-radius: 24px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.12);
+    padding: 32px 28px;
+    width: 100%;
+    max-width: 520px;
+  }
+  @media (min-width: 768px) {
+    .card { max-width: 720px; padding: 48px 44px; }
+    h1 { font-size: 36px; }
+    .mode-btn, .digit-btn { font-size: 22px; padding: 18px 12px; }
+    .start-btn { font-size: 26px; padding: 22px; }
+    .question { font-size: 56px; padding: 40px 10px; }
+    .answer-input { font-size: 34px; padding: 20px; }
+    .compare-btn { font-size: 44px; padding: 28px; }
+    .answer-box { width: 80px; height: 66px; }
+    .submit-btn { font-size: 24px; padding: 20px; }
+    .back-btn { font-size: 20px; padding: 12px 22px; }
+    .progress { font-size: 20px; }
+    .feedback { font-size: 28px; }
+  }
+  h1 {
+    text-align: center;
+    color: #ff6b9d;
+    margin-bottom: 24px;
+    font-size: 28px;
+  }
+  h2 {
+    text-align: center;
+    color: #555;
+    font-size: 20px;
+    margin-bottom: 16px;
+  }
+  .mode-group, .digit-group {
+    margin-bottom: 20px;
+  }
+  .label {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 10px;
+    font-weight: bold;
+  }
+  .mode-buttons, .digit-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .mode-btn, .digit-btn {
+    flex: 1;
+    min-width: 80px;
+    padding: 14px 10px;
+    font-size: 18px;
+    border: 3px solid #ffd1dc;
+    background: #fff;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-weight: bold;
+    color: #555;
+  }
+  .mode-btn:hover, .digit-btn:hover { background: #fff5f8; }
+  .mode-btn.active, .digit-btn.active {
+    background: #ff6b9d;
+    color: #fff;
+    border-color: #ff6b9d;
+  }
+  .start-btn {
+    width: 100%;
+    padding: 18px;
+    font-size: 22px;
+    background: linear-gradient(135deg, #74c0fc, #4dabf7);
+    color: #fff;
+    border: none;
+    border-radius: 16px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-top: 10px;
+    box-shadow: 0 4px 12px rgba(77,171,247,0.4);
+    transition: transform 0.1s;
+  }
+  .start-btn:hover { transform: translateY(-2px); }
+  .start-btn:active { transform: translateY(0); }
+
+  .top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    color: #666;
+    font-size: 16px;
+  }
+  .back-btn {
+    background: #eee;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 18px;
+  }
+  .progress {
+    font-weight: bold;
+    color: #ff6b9d;
+  }
+  .question {
+    text-align: center;
+    font-size: 42px;
+    color: #333;
+    padding: 30px 10px;
+    background: #fff9e6;
+    border-radius: 16px;
+    margin-bottom: 20px;
+    font-weight: bold;
+    letter-spacing: 2px;
+  }
+  .answer-box {
+    display: inline-block;
+    width: 60px;
+    height: 50px;
+    border: 3px dashed #ff6b9d;
+    border-radius: 10px;
+    vertical-align: middle;
+    margin: 0 8px;
+    background: #fff;
+  }
+  .answer-area {
+    margin-bottom: 16px;
+  }
+  .answer-input {
+    width: 100%;
+    padding: 16px;
+    font-size: 28px;
+    text-align: center;
+    border: 3px solid #ffd1dc;
+    border-radius: 14px;
+    outline: none;
+    font-weight: bold;
+    color: #333;
+  }
+  .answer-input:focus { border-color: #ff6b9d; }
+  .compare-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+  }
+  .compare-btn {
+    flex: 1;
+    padding: 20px;
+    font-size: 36px;
+    border: 3px solid #74c0fc;
+    background: #fff;
+    border-radius: 16px;
+    cursor: pointer;
+    font-weight: bold;
+    color: #4dabf7;
+    transition: all 0.15s;
+  }
+  .compare-btn:hover { background: #e7f5ff; }
+  .submit-btn {
+    width: 100%;
+    padding: 16px;
+    font-size: 20px;
+    background: #51cf66;
+    color: #fff;
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-top: 12px;
+  }
+  .submit-btn:active { background: #40c057; }
+  .feedback {
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+    padding: 16px;
+    border-radius: 12px;
+    margin-top: 16px;
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .feedback.correct {
+    background: #d3f9d8;
+    color: #2f9e44;
+  }
+  .feedback.wrong {
+    background: #ffe3e3;
+    color: #e03131;
+  }
+  .feedback.hidden { display: none; }
+
+  .result-screen {
+    text-align: center;
+  }
+  .result-screen .big-emoji {
+    font-size: 80px;
+    margin-bottom: 10px;
+  }
+  .result-screen .score {
+    font-size: 24px;
+    color: #666;
+    margin-bottom: 24px;
+  }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+<div class="card">
+
+  <!-- 選單頁 -->
+  <div id="menu-screen">
+    <h1>🌸 小數點練習 🌸</h1>
+
+    <div class="mode-group">
+      <div class="label">選擇模式</div>
+      <div class="mode-buttons">
+        <button class="mode-btn active" data-mode="compare">比大小</button>
+        <button class="mode-btn" data-mode="add">加法</button>
+        <button class="mode-btn" data-mode="sub">減法</button>
+      </div>
+    </div>
+
+    <div class="digit-group">
+      <div class="label">整數位數</div>
+      <div class="digit-buttons" id="int-digits">
+        <button class="digit-btn active" data-val="1">1 位</button>
+        <button class="digit-btn" data-val="2">2 位</button>
+        <button class="digit-btn" data-val="3">3 位</button>
+      </div>
+    </div>
+
+    <div class="digit-group">
+      <div class="label">小數位數</div>
+      <div class="digit-buttons" id="dec-digits">
+        <button class="digit-btn active" data-val="1">1 位</button>
+        <button class="digit-btn" data-val="2">2 位</button>
+        <button class="digit-btn" data-val="3">3 位</button>
+      </div>
+    </div>
+
+    <button class="start-btn" id="start-btn">開始練習</button>
+  </div>
+
+  <!-- 練習頁 -->
+  <div id="practice-screen" class="hidden">
+    <div class="top-bar">
+      <button class="back-btn" id="back-btn">← 回選單</button>
+      <div class="progress" id="progress-text"></div>
+    </div>
+
+    <div class="question" id="question-text"></div>
+
+    <div class="answer-area" id="answer-area"></div>
+
+    <div class="feedback hidden" id="feedback"></div>
+  </div>
+
+  <!-- 完成頁 -->
+  <div id="result-screen" class="hidden result-screen">
+    <div class="big-emoji">🎉</div>
+    <h1>全部答對了！</h1>
+    <div class="score" id="score-text"></div>
+    <button class="start-btn" id="again-btn">再玩一次</button>
+    <button class="start-btn" id="menu-btn" style="background: linear-gradient(135deg, #ffa94d, #ff922b); margin-top: 10px;">回到選單</button>
+  </div>
+
+</div>
+
+<audio id="snd-ding" src="sounds/ding.mp3" preload="auto"></audio>
+<audio id="snd-eoh" src="sounds/eoh.mp3" preload="auto"></audio>
+<audio id="snd-cheer" src="sounds/cheer.mp3" preload="auto"></audio>
+
+<script>
+const TOTAL_QUESTIONS = 10;
+
+const state = {
+  mode: 'compare',
+  intDigits: 1,
+  decDigits: 1,
+  questionIndex: 0,
+  wrongCount: 0,
+  totalWrong: 0,
+  current: null, // { n1, n2, answer, scale }
+};
+
+const $ = (id) => document.getElementById(id);
+
+// 播放音效（每次從頭播放）
+function playSound(id) {
+  const a = $(id);
+  a.currentTime = 0;
+  a.play().catch(() => {});
+}
+
+// iOS Safari 需要在使用者第一次互動時觸發播放才能解鎖音效
+let audioUnlocked = false;
+function unlockAudio() {
+  if (audioUnlocked) return;
+  audioUnlocked = true;
+  ['snd-ding', 'snd-eoh', 'snd-cheer'].forEach(id => {
+    const a = $(id);
+    const originalVolume = a.volume;
+    a.volume = 0;
+    a.play().then(() => {
+      a.pause();
+      a.currentTime = 0;
+      a.volume = originalVolume;
+    }).catch(() => {
+      a.volume = originalVolume;
+    });
+  });
+}
+document.addEventListener('click', unlockAudio, { once: true });
+document.addEventListener('touchstart', unlockAudio, { once: true });
+
+// 用整數顯示成帶小數點的字串
+function formatNum(intVal, decDigits) {
+  if (decDigits === 0) return String(intVal);
+  const s = String(intVal).padStart(decDigits + 1, '0');
+  const intPart = s.slice(0, s.length - decDigits);
+  const decPart = s.slice(s.length - decDigits);
+  return intPart + '.' + decPart;
+}
+
+// 產生隨機整數（以整數儲存，顯示時轉成小數）
+function randInt(intDigits, decDigits) {
+  // 總位數 = intDigits + decDigits
+  // 範圍：0 ~ 10^(intDigits+decDigits) - 1
+  const max = Math.pow(10, intDigits + decDigits);
+  return Math.floor(Math.random() * max);
+}
+
+// 產生題目
+function generateQuestion() {
+  const scale = Math.pow(10, state.decDigits);
+  let n1, n2, answer;
+
+  if (state.mode === 'compare') {
+    n1 = randInt(state.intDigits, state.decDigits);
+    n2 = randInt(state.intDigits, state.decDigits);
+    // 偶爾讓它們相等，多點變化
+    if (Math.random() < 0.15) n2 = n1;
+    if (n1 > n2) answer = '>';
+    else if (n1 < n2) answer = '<';
+    else answer = '=';
+  } else if (state.mode === 'add') {
+    n1 = randInt(state.intDigits, state.decDigits);
+    n2 = randInt(state.intDigits, state.decDigits);
+    answer = n1 + n2; // 整數加法，避免浮點誤差
+  } else { // sub
+    n1 = randInt(state.intDigits, state.decDigits);
+    n2 = randInt(state.intDigits, state.decDigits);
+    if (n2 > n1) [n1, n2] = [n2, n1]; // 確保結果非負
+    answer = n1 - n2;
+  }
+
+  state.current = { n1, n2, answer, scale };
+}
+
+// 渲染題目與作答區
+function renderQuestion() {
+  const { n1, n2 } = state.current;
+  const d = state.decDigits;
+  const s1 = formatNum(n1, d);
+  const s2 = formatNum(n2, d);
+
+  $('progress-text').textContent = `第 ${state.questionIndex + 1} / ${TOTAL_QUESTIONS} 題`;
+
+  if (state.mode === 'compare') {
+    $('question-text').innerHTML = `${s1} <span class="answer-box"></span> ${s2}`;
+    $('answer-area').innerHTML = `
+      <div class="compare-buttons">
+        <button class="compare-btn" data-ans="<">&lt;</button>
+        <button class="compare-btn" data-ans="=">=</button>
+        <button class="compare-btn" data-ans=">">&gt;</button>
+      </div>
+    `;
+    document.querySelectorAll('.compare-btn').forEach(btn => {
+      btn.addEventListener('click', () => checkAnswer(btn.dataset.ans));
+    });
+  } else {
+    const op = state.mode === 'add' ? '+' : '−';
+    $('question-text').textContent = `${s1}  ${op}  ${s2}  =  ?`;
+    $('answer-area').innerHTML = `
+      <input type="text" inputmode="decimal" class="answer-input" id="ans-input" placeholder="輸入答案" autocomplete="off">
+      <button class="submit-btn" id="submit-btn">確定</button>
+    `;
+    const input = $('ans-input');
+    input.focus();
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') checkAnswer(input.value);
+    });
+    $('submit-btn').addEventListener('click', () => checkAnswer(input.value));
+  }
+
+  hideFeedback();
+}
+
+// 把使用者輸入的小數字串轉成整數（乘以 scale），失敗回傳 null
+function parseUserNumber(str, decDigits) {
+  if (typeof str !== 'string') return null;
+  const trimmed = str.trim();
+  if (!/^-?\d+(\.\d+)?$/.test(trimmed)) return null;
+  const [intPart, decPart = ''] = trimmed.split('.');
+  if (decPart.length > decDigits) return null; // 使用者輸入超過允許小數位
+  const padded = decPart.padEnd(decDigits, '0');
+  const combined = intPart + padded;
+  const n = parseInt(combined, 10);
+  return isNaN(n) ? null : n;
+}
+
+function checkAnswer(userAns) {
+  const { answer } = state.current;
+  let correct = false;
+
+  if (state.mode === 'compare') {
+    correct = (userAns === answer);
+  } else {
+    const userInt = parseUserNumber(userAns, state.decDigits);
+    if (userInt === null) {
+      showFeedback('請輸入正確的數字格式喔～', false);
+      playSound('snd-eoh');
+      state.wrongCount++;
+      state.totalWrong++;
+      return;
+    }
+    correct = (userInt === answer);
+  }
+
+  if (correct) {
+    playSound('snd-ding');
+    showFeedback('答對了！ 🎉', true);
+    setTimeout(nextQuestion, 900);
+  } else {
+    playSound('snd-eoh');
+    showFeedback('不對喔～再試一次', false);
+    state.wrongCount++;
+    state.totalWrong++;
+    // 清空輸入框讓使用者重新作答
+    const input = $('ans-input');
+    if (input) {
+      input.value = '';
+      input.focus();
+    }
+  }
+}
+
+function showFeedback(text, isCorrect) {
+  const el = $('feedback');
+  el.textContent = text;
+  el.classList.remove('hidden', 'correct', 'wrong');
+  el.classList.add(isCorrect ? 'correct' : 'wrong');
+}
+
+function hideFeedback() {
+  $('feedback').classList.add('hidden');
+}
+
+function nextQuestion() {
+  state.questionIndex++;
+  state.wrongCount = 0;
+  if (state.questionIndex >= TOTAL_QUESTIONS) {
+    finishRound();
+  } else {
+    generateQuestion();
+    renderQuestion();
+  }
+}
+
+function finishRound() {
+  $('practice-screen').classList.add('hidden');
+  $('result-screen').classList.remove('hidden');
+  const correctRate = TOTAL_QUESTIONS;
+  $('score-text').textContent = `共 ${TOTAL_QUESTIONS} 題，途中錯了 ${state.totalWrong} 次`;
+  playSound('snd-cheer');
+}
+
+function startRound() {
+  state.questionIndex = 0;
+  state.wrongCount = 0;
+  state.totalWrong = 0;
+  $('menu-screen').classList.add('hidden');
+  $('result-screen').classList.add('hidden');
+  $('practice-screen').classList.remove('hidden');
+  generateQuestion();
+  renderQuestion();
+}
+
+function backToMenu() {
+  $('practice-screen').classList.add('hidden');
+  $('result-screen').classList.add('hidden');
+  $('menu-screen').classList.remove('hidden');
+}
+
+// --- 選單按鈕事件 ---
+document.querySelectorAll('.mode-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    state.mode = btn.dataset.mode;
+  });
+});
+
+function setupDigitGroup(containerId, key) {
+  const container = $(containerId);
+  container.querySelectorAll('.digit-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      container.querySelectorAll('.digit-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      state[key] = parseInt(btn.dataset.val, 10);
+    });
+  });
+}
+setupDigitGroup('int-digits', 'intDigits');
+setupDigitGroup('dec-digits', 'decDigits');
+
+$('start-btn').addEventListener('click', startRound);
+$('back-btn').addEventListener('click', backToMenu);
+$('again-btn').addEventListener('click', startRound);
+$('menu-btn').addEventListener('click', backToMenu);
+</script>
+</body>
+</html>
