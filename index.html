@@ -37,7 +37,7 @@
     .question { font-size: 56px; padding: 40px 10px; }
     .answer-input { font-size: 34px; padding: 20px; }
     .compare-btn { font-size: 44px; padding: 28px; }
-    .answer-box { width: 80px; height: 66px; }
+    .answer-box { width: 84px; height: 76px; line-height: 70px; font-size: 56px; }
     .submit-btn { font-size: 24px; padding: 20px; }
     .back-btn { font-size: 20px; padding: 12px 22px; }
     .progress { font-size: 20px; }
@@ -138,8 +138,13 @@
   }
   .answer-box {
     display: inline-block;
-    width: 60px;
-    height: 50px;
+    width: 64px;
+    height: 58px;
+    line-height: 52px;
+    text-align: center;
+    font-size: 42px;
+    font-weight: bold;
+    color: #333;
     border: 3px dashed #ff6b9d;
     border-radius: 10px;
     vertical-align: middle;
@@ -401,7 +406,11 @@ function renderQuestion() {
       </div>
     `;
     document.querySelectorAll('.compare-btn').forEach(btn => {
-      btn.addEventListener('click', () => checkAnswer(btn.dataset.ans));
+      btn.addEventListener('click', () => {
+        const box = document.querySelector('.answer-box');
+        if (box) box.textContent = btn.dataset.ans;
+        checkAnswer(btn.dataset.ans);
+      });
     });
   } else {
     const op = state.mode === 'add' ? '+' : '−';
