@@ -421,6 +421,14 @@ function renderQuestion() {
     `;
     const input = $('ans-input');
     input.focus();
+    // iPad/iOS 在部分語系下 inputmode="decimal" 小鍵盤會顯示逗號，即時轉成小數點
+    input.addEventListener('input', () => {
+      if (input.value.includes(',')) {
+        const pos = input.selectionStart;
+        input.value = input.value.replace(/,/g, '.');
+        try { input.setSelectionRange(pos, pos); } catch (e) {}
+      }
+    });
     input.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') checkAnswer(input.value);
     });
@@ -433,7 +441,8 @@ function renderQuestion() {
 // 把使用者輸入的小數字串轉成整數（乘以 scale），失敗回傳 null
 function parseUserNumber(str, decDigits) {
   if (typeof str !== 'string') return null;
-  const trimmed = str.trim();
+  // 逗號一律視為小數點（iPad 某些鍵盤會打出逗號）
+  const trimmed = str.trim().replace(/,/g, '.');
   if (!/^-?\d+(\.\d+)?$/.test(trimmed)) return null;
   const [intPart, decPart = ''] = trimmed.split('.');
   if (decPart.length > decDigits) return null; // 使用者輸入超過允許小數位
